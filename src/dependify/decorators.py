@@ -47,7 +47,7 @@ def inject(_func=None, *, container: Container = _container):
         return decorated(_func)
 
 
-def injectable(_func=None, *, patch=None, cached=False, autowire=True):
+def injectable(_func=None, *, patch=None, cached=False):
     """
     Decorator to register a class as an injectable dependency.
 
@@ -58,9 +58,9 @@ def injectable(_func=None, *, patch=None, cached=False, autowire=True):
 
     def decorator(func):
         if patch:
-            register(patch, func, cached, autowire)
+            register(patch, func, cached)
         else:
-            register(func, None, cached, autowire)
+            register(func, None, cached)
 
         return func
 
