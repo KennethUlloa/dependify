@@ -53,7 +53,3 @@ class Dependency:
                 self.instance = self.target(*args, **kwargs)
             return self.instance
         return self.target(*args, **kwargs)
-
-
-d = Dependency(str)
-a = d.resolve()
