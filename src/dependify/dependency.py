@@ -1,4 +1,5 @@
 from typing import Any, Callable, Type
+from inspect import signature, _empty
 
 
 class Dependency:
@@ -7,26 +8,35 @@ class Dependency:
     """
 
     cached: bool = False
-    autowire: bool = True
     instance: Any = None
-    target: Callable|Type
+    symbol: Callable|Type
+    types: dict[str, Type]
+    defaults: dict[str, Any]
 
-    def __init__(self, target: Callable|Type, cached: bool = False, autowire: bool = True):
+    def __init__(self, symbol: Callable|Type, cached: bool = False):
         """
         Initializes a new instance of the `Dependency` class.
 
         Args:
-            target (Callable|Type): The target function or class to resolve the dependency.
+            symbol (Callable|Type): The target function or class to resolve the dependency.
             cached (bool, optional): Indicates whether the dependency should be cached. Defaults to False.
             autowire (bool, optional): Indicates whether the dependency arguments should be autowired. Defaults to True.
         """
-        self.target = target
+        self.target = symbol
         self.cached = cached
-        self.autowire = autowire
-    
+        self.types = {
+            name: param.annotation for name, param in signature(symbol).parameters.items()
+            if param.annotation != _empty
+        }
+        self.defaults = {
+            name: param.default for name, param in signature(symbol).parameters.items()
+            if param.default != _empty
+        }
+
+
     def resolve(self, *args, **kwargs):
         """
-        Resolves the dependency by invoking the target function or creating an instance of the target class.
+        Resolves the dependency by invoking the symbol or creating an instance of the symbol.
         
         Args:
             *args: Variable length argument list to be passed to the target function or class constructor.

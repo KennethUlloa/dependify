@@ -1,4 +1,3 @@
-from inspect import signature
 from types import MappingProxyType
 from typing import Callable, Type
 from .dependency import Dependency
@@ -33,7 +32,7 @@ class Container:
         """
         self.__dependencies = dependencies
 
-    def register_dependency(self, name: Type, dependency: Dependency):
+    def register_dependency(self, symbol: Type, dependency: Dependency):
         """
         Registers a dependency with the specified name.
 
@@ -41,66 +40,62 @@ class Container:
             name (Type): The name of the dependency.
             dependency (Dependency): The dependency to be registered.
         """
-        self.__dependencies[name] = dependency
+        self.__dependencies[symbol] = dependency
 
-    def register(self, name: Type, target: Type|Callable = None, cached: bool = False, autowired: bool = True):
+    def register(
+        self, symbol: Type, replacement: Type | Callable = None, cached: bool = False
+    ):
         """
         Registers a dependency with the specified name and target.
 
         Args:
-            name (Type): The name of the dependency.
-            target (Type|Callable, optional): The target type or callable to be resolved as the dependency. Defaults to None.
+            symbol (Type): The dependency.
+            replacement (Type|Callable, optional): The target type or callable to be resolved as the dependency. Defaults to None.
             cached (bool, optional): Indicates whether the dependency should be cached. Defaults to False.
-            autowired (bool, optional): Indicates whether the dependency should be resolved automatically. Defaults to True.
         """
-        if not target:
-            target = name
-        self.register_dependency(name, Dependency(target, cached, autowired))
+        if not replacement:
+            replacement = symbol
+        self.register_dependency(symbol, Dependency(replacement, cached))
 
-    def resolve(self, name: Type):
+    def resolve(self, symbol: Type):
         """
         Resolves a dependency with the specified name.
 
         Args:
-            name (Type): The name of the dependency.
+            symbol (Type): The name of the dependency.
 
         Returns:
             Any: The resolved dependency, or None if the dependency is not registered.
         """
-        if name not in self.__dependencies:
+        if symbol not in self.__dependencies:
             return None
 
-        dependency = self.__dependencies[name]
-
-        if not dependency.autowire:
-            return dependency.resolve()
-        
+        dependency = self.__dependencies[symbol]
         kwargs = {}
-        parameters = signature(dependency.target).parameters
 
-        for name, parameter in parameters.items():
-            if parameter.annotation in self.__dependencies:
-                kwargs[name] = self.resolve(parameter.annotation)
-            
+        kwargs.update(dependency.defaults)
+
+        for name, symbol in dependency.types.items():
+            inner_dep = self.resolve(symbol)
+            if inner_dep is not None:
+                kwargs[name] = inner_dep
+
         return dependency.resolve(**kwargs)
 
-    def has(self, name: Type) -> bool:
+    def has(self, symbol: Type) -> bool:
         """
-        Checks if the container has a dependency with the specified name.
+        Checks if the container has registered the symbol.
 
         Args:
-            name (Type): The name of the dependency.
+            symbol (Type): The dependency.
 
         Returns:
             bool: True if the container has the dependency, False otherwise.
         """
-        return name in self.__dependencies
-    
+        return symbol in self.__dependencies
+
     def dependencies(self) -> dict[Type, Dependency]:
         """
         Returns a read-only view of the container's dependencies.
         """
         return MappingProxyType(self.__dependencies)
-
-            
-        

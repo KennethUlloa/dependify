@@ -21,7 +21,7 @@ def __get_existing_annot(f, container: Container = _container) -> dict[str, Type
             existing_annot[name] = parameter.annotation
 
     return existing_annot
-    
+
 
 def inject(_func=None, *, container: Container = _container):
     """
@@ -30,17 +30,19 @@ def inject(_func=None, *, container: Container = _container):
     Parameters:
         container (Container): the container used to inject the dependencies. Defaults to module container.
     """
+
     def decorated(func):
         @wraps(func)
         def subdecorator(*args, **kwargs):
             for name, annotation in __get_existing_annot(func, container).items():
                 kwargs[name] = container.resolve(annotation)
             return func(*args, **kwargs)
+
         return subdecorator
-    
+
     if _func is None:
         return decorated
-    
+
     else:
         return decorated(_func)
 
@@ -53,6 +55,7 @@ def injectable(_func=None, *, patch=None, cached=False, autowire=True):
         patch (Type): The type to patch.
         cached (bool): Whether the dependency should be cached.
     """
+
     def decorator(func):
         if patch:
             register(patch, func, cached, autowire)
@@ -60,9 +63,8 @@ def injectable(_func=None, *, patch=None, cached=False, autowire=True):
             register(func, None, cached, autowire)
 
         return func
-    
+
     if _func is None:
         return decorator
     else:
         return decorator(_func)
-
