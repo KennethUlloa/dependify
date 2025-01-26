@@ -1,6 +1,8 @@
 from types import MappingProxyType
-from typing import Callable, Type
+from typing import Callable, Type, TypeVar
 from .dependency import Dependency
+
+T = TypeVar("T")
 
 
 class Container:
@@ -57,7 +59,7 @@ class Container:
             replacement = symbol
         self.register_dependency(symbol, Dependency(replacement, cached))
 
-    def resolve(self, symbol: Type):
+    def resolve(self, symbol: Type[T]) -> T | None:
         """
         Resolves a dependency with the specified name.
 
