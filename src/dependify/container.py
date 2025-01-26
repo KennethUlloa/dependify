@@ -18,7 +18,7 @@ class Container:
     Methods:
         __init__(self, dependencies: dict[str, Dependency] = {}): Initializes a new instance of the `Container` class.
         register_dependency(self, name: Type, dependency: Dependency): Registers a dependency with the specified name.
-        register(self, name: Type, target: Type|Callable = None, cached: bool = False, autowired: bool = True): Registers a dependency with the specified name and target.
+        register(self, name: Type, target: Type|Callable = None, cached: bool = False): Registers a dependency with the specified name and target.
         resolve(self, name: Type): Resolves a dependency with the specified name.
 
     """

@@ -22,7 +22,6 @@ class Dependency:
         Args:
             symbol (Callable|Type): The target function or class to resolve the dependency.
             cached (bool, optional): Indicates whether the dependency should be cached. Defaults to False.
-            autowire (bool, optional): Indicates whether the dependency arguments should be autowired. Defaults to True.
         """
         self.target = symbol
         self.cached = cached
