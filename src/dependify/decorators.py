@@ -1,6 +1,6 @@
-from functools import wraps
+from functools import partial, wraps
 from inspect import Parameter, Signature, signature
-from typing import Optional, Type
+from typing import Optional, Type, TypeVar
 
 from .container import Container
 from .context import _container, register
@@ -82,7 +82,12 @@ def injectable(
         return decorator(_func)
 
 
-def injected(class_: Type, *, container: Container = _container):
+class_type = TypeVar("class_type", bound=type)
+
+
+def injected(
+    class_: class_type, *, container: Container = _container
+) -> class_type:
     """
     Decorator to create default constructor of a class it none present
     """
@@ -125,7 +130,8 @@ def injected(class_: Type, *, container: Container = _container):
 
     __init__.__annotations__ = class_.__annotations__.copy()
     __init__.__signature__ = Signature(
-        tuple(
+        (Parameter("self", Parameter.POSITIONAL_OR_KEYWORD),)
+        + tuple(
             Parameter(
                 name, Parameter.POSITIONAL_OR_KEYWORD, annotation=annotation
             )
@@ -134,3 +140,32 @@ def injected(class_: Type, *, container: Container = _container):
     )
     class_.__init__ = inject(__init__, container=container)
     return class_
+
+
+def wired(
+    class_: Optional[type] = None,
+    *,
+    patch=None,
+    cached=False,
+    autowire=True,
+    container: Container = _container,
+):
+    """
+    Decorator that combines @injectable and @injected decorators.
+    Registers a class as injectable and auto-generates constructor with dependency injection.
+    """
+    if class_ is None:
+        return partial(
+            wired,
+            patch=patch,
+            cached=cached,
+            autowire=autowire,
+            container=container,
+        )
+    return injectable(
+        injected(class_, container=container),
+        patch=patch,
+        cached=cached,
+        autowire=autowire,
+        container=container,
+    )
