@@ -1,6 +1,6 @@
 from functools import wraps
 from inspect import Parameter, Signature, signature
-from typing import Type
+from typing import Optional, Type
 
 from .container import Container
 from .context import _container, register
@@ -52,7 +52,14 @@ def inject(_func=None, *, container: Container = _container):
         return decorated(_func)
 
 
-def injectable(_func=None, *, patch=None, cached=False, autowire=True):
+def injectable(
+    _func: Optional[Type] = None,
+    *,
+    patch: Optional[Type] = None,
+    cached=False,
+    autowire=True,
+    container: Container = _container,
+):
     """
     Decorator to register a class as an injectable dependency.
 
@@ -63,9 +70,9 @@ def injectable(_func=None, *, patch=None, cached=False, autowire=True):
 
     def decorator(func):
         if patch:
-            register(patch, func, cached, autowire)
+            register(patch, func, cached, autowire, container)
         else:
-            register(func, None, cached, autowire)
+            register(func, None, cached, autowire, container)
 
         return func
 

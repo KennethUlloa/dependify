@@ -12,18 +12,23 @@ def register(
     target: Type | Callable = None,
     cached: bool = False,
     autowired: bool = True,
+    container: Container = _container,
 ):
     """
     Registers a dependency with the specified name and target.
     """
-    return _container.register(name, target, cached, autowired)
+    return container.register(name, target, cached, autowired)
 
 
-def register_dependency(name: Type, dependency: Dependency):
+def register_dependency(
+    name: Type,
+    dependency: Dependency,
+    container: Container = _container,
+):
     """
     Registers a dependency with the specified name.
     """
-    return _container.register_dependency(name, dependency)
+    return container.register_dependency(name, dependency)
 
 
 def resolve(name: Type):
