@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.dependify import Dependency
+from dependify import Dependency
 
 
 class TestDependency(TestCase):
