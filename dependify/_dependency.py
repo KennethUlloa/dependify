@@ -1,4 +1,7 @@
-from typing import Any, Callable, Type
+from typing import Any
+from typing import Callable
+from typing import Type
+from typing import Union
 
 
 class Dependency:
@@ -9,11 +12,11 @@ class Dependency:
     cached: bool = False
     autowire: bool = True
     instance: Any = None
-    target: Callable | Type
+    target: Union[Type, Callable]
 
     def __init__(
         self,
-        target: Callable | Type,
+        target: Union[Type, Callable],
         cached: bool = False,
         autowire: bool = True,
     ):
@@ -45,3 +48,17 @@ class Dependency:
                 self.instance = self.target(*args, **kwargs)
             return self.instance
         return self.target(*args, **kwargs)
+
+    def __eq__(self, other):
+        """
+        Check if two Dependency objects are equal based on target, cached, and autowire.
+        """
+        if not isinstance(other, Dependency):
+            return False
+        return self.target == other.target
+
+    def __hash__(self):
+        """
+        Generate hash for Dependency object based on target, cached, and autowire.
+        """
+        return hash((self.target, self.cached, self.autowire))

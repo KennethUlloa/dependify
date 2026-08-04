@@ -1,0 +1,39 @@
+name: Bump and Tag Version on Main
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+jobs:
+  bump_and_tag:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: pip install poetry
+        name: Install Poetry
+
+      - run: |
+          poetry version patch
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml
+          git commit -m "bump: patch version"
+        name: Bump patch version
+
+      - name: Pull latest main with rebase
+        run: git pull --rebase origin main
+
+      - name: Push bump commit
+        run: git push origin main
