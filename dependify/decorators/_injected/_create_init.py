@@ -71,7 +71,6 @@ def create_init(
         if hasattr(class_, "__post_init__"):
             class_.__post_init__(self)
 
-    __init__.__annotations__ = class_annotations.copy()
     __init__.__signature__ = Signature(
         (Parameter("self", Parameter.POSITIONAL_OR_KEYWORD),)
         + tuple(
@@ -85,4 +84,7 @@ def create_init(
             )
         )
     )
-    return inject(__init__, container=container)
+    injected_init = inject(__init__, container=container)
+    injected_init.__annotations__ = class_annotations.copy()
+    injected_init.__signature__ = __init__.__signature__
+    return injected_init
