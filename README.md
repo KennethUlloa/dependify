@@ -1,3 +1,7 @@
+<div style="display: flex; justify-content: center">
+    <img src="https://github.com/KennethUlloa/dependify/raw/main/images/dependify.svg" width="80%">
+</div>
+
 # Dependify
 
 A powerful and flexible dependency injection framework for Python that makes managing dependencies simple and intuitive.
